@@ -46,7 +46,7 @@
 5. Импортировать в Airflow Variables `variables.json`
 6. Создать Airflow подключения postgress и http по аналогии:
 [![img\http.png](img\http.png "img\http.png")](http://img\http.png "img\http.png")
-[![img\http.png](img\pg.png "img\http.png")](http://img\pg.png "img\http.png")
+[![img\http.png](img\pg.png "img\http.png")](http://img\pg.png "img\pg.png")
 1.  Скопировать даги в `/airflow-data/dags/`
 
 ### Прогрузка котировок
