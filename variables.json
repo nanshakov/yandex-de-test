@@ -1,0 +1,7 @@
+{
+    "base": "BTC",
+    "from_dt": "2021-04-04",
+    "pg_table": "exchange_data",
+    "symbols": "USD",
+    "to_dt": "2021-04-05"
+}

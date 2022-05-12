@@ -1,0 +1,143 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:14.0
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=airflow
+      - POSTGRES_PORT=5432
+    volumes:
+    - database-data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5080:80"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./portainer-data:/data
+    ports:
+      - 9000:9000
+      
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+
+  airflow:
+    build: .
+    image: resdev-airflow:latest
+    container_name: airflow
+    env_file:
+      - .env
+    restart: always
+    command: webserver
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+    volumes:
+      - ./airflow-data/dags:/opt/airflow/dags
+      - ./airflow-data/plugins:/opt/airflow/plugins
+      - logs-volume:/opt/airflow/logs
+
+  airflow-scheduler:
+    build: .
+    image: resdev-airflow:latest
+    container_name: airflow_scheduler
+    env_file:
+      - .env
+    restart: always
+    command: scheduler
+    depends_on:
+      - postgres
+    volumes:
+      - ./airflow-data/dags:/opt/airflow/dags
+      - ./airflow-data/plugins:/opt/airflow/plugins
+      - logs-volume:/opt/airflow/logs
+
+  airflow-worker1:
+    build: .
+    image: resdev-airflow:latest
+    container_name: airflow_worker1
+    env_file:
+      - .env
+    restart: always
+    command: celery worker
+    depends_on:
+      - postgres
+    volumes:
+      - ./airflow-data/dags:/opt/airflow/dags
+      - ./airflow-data/plugins:/opt/airflow/plugins
+      - logs-volume:/opt/airflow/logs
+
+  airflow-worker2:
+    build: .
+    image: resdev-airflow:latest
+    container_name: airflow_worker2
+    env_file:
+      - .env
+    restart: always
+    command: celery worker
+    depends_on:
+      - postgres
+    volumes:
+      - ./airflow-data/dags:/opt/airflow/dags
+      - ./airflow-data/plugins:/opt/airflow/plugins
+      - logs-volume:/opt/airflow/logs
+
+  airflow-worker3:
+    build: .
+    image: resdev-airflow:latest
+    container_name: airflow_worker3
+    env_file:
+      - .env
+    restart: always
+    depends_on:
+      - postgres
+    command: celery worker
+    volumes:
+      - ./airflow-data/dags:/opt/airflow/dags
+      - ./airflow-data/plugins:/opt/airflow/plugins
+      - logs-volume:/opt/airflow/logs
+
+  airflow-flower:
+    build: .
+    image: resdev-airflow:latest
+    container_name: airflow_flower
+    depends_on:
+      - postgres
+    volumes:
+      - ./airflow-data/dags:/opt/airflow/dags
+      - ./airflow-data/plugins:/opt/airflow/plugins
+      - logs-volume:/opt/airflow/logs
+    env_file:
+      - .env
+    restart: always
+    command: celery flower
+    ports:
+      - 5555:5555
+
+
+volumes:
+  database-data:
+  logs-volume:
